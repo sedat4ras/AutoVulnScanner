@@ -30,7 +30,7 @@
 
 &nbsp;   ```bash
 
-&nbsp;   git clone \[https://github.com/KULLANICI\_ADIN/AutoVulnScanner.git](https://github.com/KULLANICI\_ADIN/AutoVulnScanner.git)
+&nbsp;   git clone \[https://github.com/sedat4ras/AutoVulnScanner.git](https://github.com/KULLANICI\_ADIN/AutoVulnScanner.git)
 
 &nbsp;   cd AutoVulnScanner
 
