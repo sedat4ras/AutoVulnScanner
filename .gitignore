@@ -1,0 +1,15 @@
+# Sanal Ortam
+venv/
+
+# Çevre Değişkenleri (ŞİFRELER BURADA, ASLA YÜKLEME)
+.env
+
+# Python Cache dosyaları
+__pycache__/
+*.pyc
+
+# Oluşturulan Raporlar ve Taramalar (Depoyu kirletmesin)
+scans/
+reports/
+*.xml
+*.pdf
