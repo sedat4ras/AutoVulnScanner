@@ -1,4 +1,4 @@
-\# 🛡️ AutoVulnScanner (AI-Powered Auditor)
+\#  AutoVulnScanner (AI-Powered Auditor)
 
 
 
@@ -6,7 +6,7 @@
 
 
 
-\## 🚀 Features
+\##  Features
 
 
 
@@ -22,7 +22,7 @@
 
 
 
-\## 🛠️ Installation
+\##  Installation
 
 
 
@@ -70,7 +70,7 @@
 
 
 
-\## 💻 Usage
+\## Usage
 
 
 
@@ -96,7 +96,7 @@ Find your report in the reports/ folder.
 
 
 
-⚠️ Disclaimer
+Disclaimer
 
 This tool is designed for educational purposes and authorized security testing only. Do not use this tool on networks or systems you do not own or do not have explicit permission to test. The author is not responsible for any misuse.
 
