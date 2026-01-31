@@ -88,10 +88,8 @@ Domain Name: scanme.nmap.org (Nmap's authorized test server)
 ### Terminal Output
 ![Terminal Output](assets/terminal.png)
 
-### Sample Output Report
-The final output is a structured, executive-level PDF report. It includes technical explanations and specific remediation steps for each identified vulnerability.
--
-![Report Preview](assets/report-example.pdf)
+
+> **Note:** If you'd like to see the tool in action, you can check the terminal output screenshot above. For those interested in the depth of our AI analysis and professional formatting, feel free to examine the [Sample PDF Report](assets/report-example.pdf) provided in this repository.
 
 
 
