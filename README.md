@@ -91,7 +91,7 @@ Domain Name: scanme.nmap.org (Nmap's authorized test server)
 ### Sample Output Report
 The final output is a structured, executive-level PDF report. It includes technical explanations and specific remediation steps for each identified vulnerability.
 -
-![Report Preview](assets/report-example-report.pdf)
+![Report Preview](assets/report-example.pdf)
 
 
 
