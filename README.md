@@ -83,7 +83,15 @@ Localhost: 127.0.0.1 (For testing your own machine)
 
 Domain Name: scanme.nmap.org (Nmap's authorized test server)
 
+## Project Showcase
 
+### Terminal Output
+![Terminal Output](assets/terminal.png)
+
+### Sample Output Report
+The final output is a structured, executive-level PDF report. It includes technical explanations and specific remediation steps for each identified vulnerability.
+-
+![Report Preview](assets/report-example-report.pdf)
 
 
 
