@@ -1,95 +1,96 @@
-# AutoVulnScanner: AI-Powered Vulnerability Auditor
+# AutoVulnScanner
 
-[![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://www.python.org/)
-[![Nmap](https://img.shields.io/badge/Scanner-Nmap-orange.svg)](https://nmap.org/)
-[![OpenAI](https://img.shields.io/badge/AI-GPT--4-green.svg)](https://openai.com/)
+> An automated security assessment tool that bridges the gap between raw Nmap scanning and actionable intelligence using AI-powered analysis and professional PDF reporting.
 
-**AutoVulnScanner** is an automated security assessment tool that bridges the gap between raw network scanning and actionable intelligence. It automates technical discovery via Nmap and leverages Artificial Intelligence to provide executive-level risk summaries and remediation guidance.
+[![Python](https://img.shields.io/badge/Python-3.9+-blue?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
+[![Nmap](https://img.shields.io/badge/Scanner-Nmap-orange?style=flat-square)](https://nmap.org/)
+[![OpenAI](https://img.shields.io/badge/AI-GPT--4-412991?style=flat-square&logo=openai&logoColor=white)](https://openai.com/)
+[![License](https://img.shields.io/badge/License-MIT-lightgrey?style=flat-square)]()
 
+---
 
+## Overview
 
-##Key Features
--
-* **Intelligent Analysis:** Integrates with OpenAI (GPT-4/3.5) to interpret scan results and explain risks in plain English.
-* **Automated Scanning:** Executes service-version detection (`-sV`) and port discovery automatically.
-* **Executive Reporting:** Generates professional PDF reports ready for stakeholders.
-* **Risk Prioritization:** Automatically assigns severity levels (Low to Critical) based on service exposure.
+AutoVulnScanner automates the full vulnerability assessment workflow — from network discovery to executive reporting. It runs Nmap service-version detection, feeds the results to OpenAI for risk interpretation, and generates a stakeholder-ready PDF report with severity classifications and remediation guidance.
 
-##Prerequisites
-Ensure you have the following installed on your system:
+## How It Works
 
-Python 3.9+: Download Python
-
-Nmap macOS: 
-```brew install nmap```
-
-Windows: Download Nmap Setup (Check "Add to PATH" during installation)
-
-Linux: 
-```sudo apt install nmap```
-
-
-##Installation & Setup
-
-- **Clone the Project:**
- ```
- git clone [https://github.com/sedat4ras/AutoVulnScanner.git](https://github.com/sedat4ras/AutoVulnScanner.git)
- cd AutoVulnScanner
+```
+┌──────────────┐      ┌──────────────────┐      ┌─────────────────┐
+│              │      │                  │      │                 │
+│  Nmap Scan   │─────►│  AI Analysis     │─────►│  PDF Report     │
+│  (-sV)       │      │  (GPT-4/3.5)     │      │  Generation     │
+│              │      │                  │      │                 │
+│ Port & Svc   │      │ Risk Assessment  │      │ Executive-Ready │
+│ Discovery    │      │ Plain English    │      │ Deliverable     │
+│              │      │ Remediation      │      │                 │
+└──────────────┘      └──────────────────┘      └─────────────────┘
 ```
 
--**Environment Isolation (Recommended)**
-Create and activate a virtual environment to avoid dependency conflicts:
-```
-# Windows
-python -m venv venv
-.\venv\Scripts\activate
+## Features
 
-# macOS/Linux
-python3 -m venv venv
-source venv/bin/activate
-```
+| Feature | Description |
+|---------|-------------|
+| **Automated Scanning** | Executes Nmap service-version detection (`-sV`) with automatic port discovery |
+| **AI-Powered Analysis** | GPT-4/3.5 interprets scan results and explains risks in plain English |
+| **Risk Prioritization** | Automatically assigns severity levels (Low to Critical) based on service exposure |
+| **Executive Reporting** | Generates professional PDF reports ready for stakeholders |
 
+## Quick Start
 
+### Prerequisites
 
--**Install Dependencies**
-This will install all necessary libraries including python-nmap, openai, and fpdf:
-```
-pip install --upgrade pip
+| Requirement | Installation |
+|------------|-------------|
+| Python 3.9+ | [python.org](https://www.python.org/) |
+| Nmap | `brew install nmap` (macOS) / `sudo apt install nmap` (Linux) / [nmap.org](https://nmap.org/download) (Windows) |
+| OpenAI API Key | [platform.openai.com](https://platform.openai.com/) |
+
+### Installation
+
+```bash
+git clone https://github.com/sedat4ras/AutoVulnScanner.git
+cd AutoVulnScanner
+
+python -m venv venv && source venv/bin/activate  # macOS/Linux
+# python -m venv venv && .\venv\Scripts\activate  # Windows
+
 pip install -r requirements.txt
 ```
 
--**API Configuration**
-Create a file named (.env) in the root directory.
+### Configuration
 
-Add your OpenAI API key: ```OPENAI_API_KEY=your_actual_key_here```
+Create a `.env` file in the project root:
 
-
--**Usage Guide**
-
-After completing the installation, you can start the automated audit process with a single command.
-
-Start the Tool
-Make sure your virtual environment is active, then run:
 ```
+OPENAI_API_KEY=your_actual_key_here
+```
+
+### Usage
+
+```bash
 python main.py
 ```
 
--**Enter Target Information**
-The tool will prompt you for a target. You can enter:
-
-Single IP: 192.168.1.5
-
-Localhost: 127.0.0.1 (For testing your own machine)
-
-Domain Name: scanme.nmap.org (Nmap's authorized test server)
+Enter the target when prompted:
+- **Single IP:** `192.168.1.5`
+- **Localhost:** `127.0.0.1`
+- **Domain:** `scanme.nmap.org` (Nmap's authorized test server)
 
 ## Project Showcase
 
 ### Terminal Output
+
 ![Terminal Output](assets/terminal.png)
 
+### Sample Report
 
-> **Note:** If you'd like to see the tool in action, you can check the terminal output screenshot above. For those interested in the depth of our AI analysis and professional formatting, feel free to examine the [Sample PDF Report](assets/report-example.pdf) provided in this repository.
+For a detailed look at the AI analysis and professional formatting, examine the [Sample PDF Report](assets/report-example.pdf) included in this repository.
 
+## Disclaimer
 
+This tool is intended for **authorized security assessments only**. Always obtain explicit written permission before scanning any network or system. Unauthorized scanning may violate applicable laws and regulations.
 
+## Contact
+
+GitHub: [sedat4ras](https://github.com/sedat4ras) | Email: sudo@sedataras.com
