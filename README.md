@@ -1,4 +1,4 @@
-# AutoVulnScanner v2
+# ShieldScan
 
 > A comprehensive source code security scanning pipeline combining SAST, SCA, and secrets detection with local LLM triage for prioritized, actionable findings.
 
@@ -13,7 +13,7 @@
 
 ## Overview
 
-AutoVulnScanner v2 is a production-grade DevSecOps pipeline that scans source code repositories for vulnerabilities across three dimensions:
+ShieldScan is a production-grade DevSecOps pipeline that scans source code repositories for vulnerabilities across three dimensions:
 
 1. **SAST** (Static Application Security Testing) — Code pattern matching for vulnerabilities (SQL injection, XSS, weak crypto)
 2. **SCA** (Software Composition Analysis) — Dependency scanning for known CVEs
@@ -90,8 +90,8 @@ All findings are automatically categorized and prioritized using a **local Ollam
 
 ```bash
 # Clone repository
-git clone https://github.com/sedat4ras/AutoVulnScanner.git
-cd AutoVulnScanner
+git clone https://github.com/sedat4ras/ShieldScan.git
+cd ShieldScan
 
 # Create virtual environment
 python -m venv venv && source venv/bin/activate  # macOS/Linux
@@ -119,8 +119,8 @@ brew install gitleaks
 ### Option B: Docker
 
 ```bash
-docker build -t autovulnscanner:v2 .
-docker run --interactive autovulnscanner:v2 /path/to/repo
+docker build -t shieldscan:latest .
+docker run --interactive shieldscan:latest /path/to/repo
 ```
 
 ## Usage
@@ -254,7 +254,7 @@ The included `.github/workflows/security-scan.yml` automatically:
 
 ## Testing
 
-AutoVulnScanner v2 has been tested with mock vulnerability data:
+ShieldScan has been tested with mock vulnerability data:
 ```bash
 $ python3 -c "
 from src.semgrep_runner import run_semgrep
@@ -299,7 +299,7 @@ semgrep --version
 
 **Docker build fails**
 ```bash
-docker build --no-cache -t autovulnscanner:v2 .
+docker build --no-cache -t shieldscan:latest .
 ```
 
 **"ModuleNotFoundError: No module named 'src'"**
@@ -325,4 +325,4 @@ MIT — See LICENSE file
 
 ## Contact
 
-GitHub: [sedat4ras](https://github.com/sedat4ras) | Email: sudo@sedataras.com
+GitHub: [sedat4ras/ShieldScan](https://github.com/sedat4ras/ShieldScan) | Email: sudo@sedataras.com
