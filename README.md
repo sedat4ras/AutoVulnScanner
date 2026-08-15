@@ -206,37 +206,25 @@ python main.py
   Fix: Remove unused imports
 ```
 
-## CI/CD Pipeline (GitHub Actions)
+## Docker Deployment
 
-ShieldScan includes a **production-ready GitHub Actions workflow** that demonstrates DevSecOps best practices:
+For production use with guaranteed tool availability, use Docker:
 
-```yaml
-Trigger: push to main/develop, pull_request
-    ↓
-┌─────────────────────────────────────────┐
-│ 1. Setup Python 3.11 environment        │
-│ 2. Install dependencies (pip)           │
-│ 3. Install Semgrep (SAST)               │
-│ 4. Install Trivy (SCA)                  │
-│ 5. Install Gitleaks (Secrets)           │
-│ 6. Run ShieldScan pipeline              │
-│ 7. Upload reports as artifacts          │
-│ 8. Comment results on PR                │
-└─────────────────────────────────────────┘
-    ↓
-📊 Security reports in artifacts
-💬 PR comments with findings
-📈 Historical tracking
+```bash
+docker build -t shieldscan:latest .
+docker run --interactive shieldscan:latest /path/to/repository
 ```
 
-**Workflow file:** `.github/workflows/security-scan.yml`
+**Dockerfile includes:**
+- Python 3.11
+- Semgrep (SAST)
+- Trivy (SCA)
+- Gitleaks (Secrets)
+- All dependencies pre-installed
 
-**Features:**
-- Automatic scanning on code changes
-- Multi-stage tool installation
-- Artifact retention for audit trail
-- PR integration for visibility
-- Resilient error handling (`|| true` continues on warnings)
+## CI/CD Integration (Future)
+
+GitHub Actions CI/CD pipeline is planned for **Faz 1-2** when proper containerization is in place. The current focus is on local scanning capability and production-grade Dockerfile.
 
 ## Technical Details
 
