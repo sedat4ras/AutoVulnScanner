@@ -139,7 +139,7 @@ ollama serve
 
 #### Step 2: Run the Scanner (in another terminal)
 ```bash
-cd AutoVulnScanner
+cd ShieldScan
 python main.py
 
 # When prompted, enter:
@@ -161,7 +161,7 @@ python main.py
 
 ### Fallback Mode (No Ollama)
 
-If Ollama is not available, AutoVulnScanner automatically generates a **structured report** without LLM categorization:
+If Ollama is not available, ShieldScan automatically generates a **structured report** without LLM categorization:
 
 ```bash
 # Even without Ollama, scanner works:
@@ -305,7 +305,7 @@ docker build --no-cache -t shieldscan:latest .
 **"ModuleNotFoundError: No module named 'src'"**
 ```bash
 # Make sure you're running from repo root:
-cd /path/to/AutoVulnScanner
+cd /path/to/ShieldScan
 python main.py
 ```
 

@@ -1,1 +1,1 @@
-# AutoVulnScanner v2 - Security scanning modules
+# ShieldScan - Security scanning modules

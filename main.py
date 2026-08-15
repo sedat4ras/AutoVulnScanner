@@ -1,5 +1,5 @@
 """
-AutoVulnScanner v2 - SAST/SCA/Secrets Pipeline with Local LLM Triage
+ShieldScan - SAST/SCA/Secrets Pipeline with Local LLM Triage
 Analyzes source code repositories for security vulnerabilities using:
   - Semgrep (SAST - code patterns)
   - Trivy (SCA - vulnerable dependencies)
@@ -19,7 +19,7 @@ from src.llm_triage import triage_findings, check_ollama_connection
 
 def main():
     print("=" * 70)
-    print(" 🔒 AutoVulnScanner v2 - Security Pipeline (SAST/SCA/Secrets) 🔒")
+    print(" 🔒 ShieldScan - Security Pipeline (SAST/SCA/Secrets) 🔒")
     print("=" * 70)
 
     # 1. Get target path
