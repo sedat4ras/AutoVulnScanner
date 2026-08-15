@@ -1,0 +1,97 @@
+name: 🔒 Security Scan Pipeline
+
+# Workflow triggers
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Prepare environment
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      # 2. Install Python dependencies
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install semgrep
+
+      # 3. Install system security tools
+      - name: Install Semgrep (SAST Scanner)
+        run: |
+          echo "📦 Installing Semgrep for static code analysis..."
+          python -m pip install semgrep
+          semgrep --version
+
+      - name: Install Trivy (SCA Scanner)
+        run: |
+          echo "📦 Installing Trivy for dependency scanning..."
+          wget -q https://github.com/aquasecurity/trivy/releases/download/v0.48.0/trivy_0.48.0_Linux-64bit.tar.gz
+          tar zxf trivy_0.48.0_Linux-64bit.tar.gz
+          chmod +x trivy
+          sudo mv trivy /usr/local/bin/
+          trivy --version
+
+      - name: Install Gitleaks (Secrets Scanner)
+        run: |
+          echo "📦 Installing Gitleaks for credential detection..."
+          wget -q https://github.com/gitleaks/gitleaks/releases/download/v8.18.0/gitleaks-linux-x64
+          chmod +x gitleaks-linux-x64
+          sudo mv gitleaks-linux-x64 /usr/local/bin/gitleaks
+          gitleaks --version
+
+      # 4. Run security scans
+      - name: 🔍 Run Security Scan Pipeline
+        run: |
+          echo "Starting ShieldScan security analysis..."
+          echo "Target: repository root (.)"
+          python main.py . 2>&1 || true
+        env:
+          PYTHONUNBUFFERED: 1
+
+      # 5. Collect and upload reports
+      - name: 📊 Upload Security Reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-reports
+          path: |
+            security_report_*.md
+            findings_*.json
+          retention-days: 30
+
+      # 6. Comment on PR with results
+      - name: 💬 Post Results to PR
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const reports = fs.readdirSync('.').filter(f => f.startsWith('security_report_'));
+            if (reports.length > 0) {
+              const report = fs.readFileSync(reports[0], 'utf8');
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: '## 🔒 ShieldScan Security Results\n\n' + report
+              });
+            }
+
+      # 7. Summary
+      - name: ✅ Pipeline Complete
+        run: |
+          echo "Security scan pipeline completed!"
+          echo "📝 Check artifacts for detailed reports"

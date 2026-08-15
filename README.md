@@ -206,13 +206,37 @@ python main.py
   Fix: Remove unused imports
 ```
 
-## GitHub Actions Integration
+## CI/CD Pipeline (GitHub Actions)
 
-The included `.github/workflows/security-scan.yml` automatically:
-1. Runs on every `push` to main/develop
-2. Scans your code with all three scanners
-3. Posts results as PR comment
-4. Uploads reports as CI artifacts
+ShieldScan includes a **production-ready GitHub Actions workflow** that demonstrates DevSecOps best practices:
+
+```yaml
+Trigger: push to main/develop, pull_request
+    ↓
+┌─────────────────────────────────────────┐
+│ 1. Setup Python 3.11 environment        │
+│ 2. Install dependencies (pip)           │
+│ 3. Install Semgrep (SAST)               │
+│ 4. Install Trivy (SCA)                  │
+│ 5. Install Gitleaks (Secrets)           │
+│ 6. Run ShieldScan pipeline              │
+│ 7. Upload reports as artifacts          │
+│ 8. Comment results on PR                │
+└─────────────────────────────────────────┘
+    ↓
+📊 Security reports in artifacts
+💬 PR comments with findings
+📈 Historical tracking
+```
+
+**Workflow file:** `.github/workflows/security-scan.yml`
+
+**Features:**
+- Automatic scanning on code changes
+- Multi-stage tool installation
+- Artifact retention for audit trail
+- PR integration for visibility
+- Resilient error handling (`|| true` continues on warnings)
 
 ## Technical Details
 
