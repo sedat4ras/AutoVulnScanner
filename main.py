@@ -22,10 +22,14 @@ def main():
     print(" 🔒 ShieldScan - Security Pipeline (SAST/SCA/Secrets) 🔒")
     print("=" * 70)
 
-    # 1. Get target path
-    print("\nEnter target path to scan (file/directory/git repo):")
-    print("  Example: . (current dir), /path/to/repo, ./src")
-    target = input("Target path: ").strip() or "."
+    # 1. Get target path (from CLI arg or interactive)
+    if len(sys.argv) > 1:
+        target = sys.argv[1]
+        print(f"\n[CLI] Scanning: {target}")
+    else:
+        print("\nEnter target path to scan (file/directory/git repo):")
+        print("  Example: . (current dir), /path/to/repo, ./src")
+        target = input("Target path: ").strip() or "."
 
     if not Path(target).exists():
         print(f"❌ Error: Path '{target}' not found")

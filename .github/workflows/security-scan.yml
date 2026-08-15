@@ -28,23 +28,34 @@ jobs:
         run: |
           python -m pip install semgrep
 
-      - name: Install Trivy
+      - name: Install system tools
         run: |
-          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+          sudo apt-get update
+          sudo apt-get install -y wget curl
+
+          # Trivy
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add - || true
           echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
           sudo apt-get update
-          sudo apt-get install -y trivy
+          sudo apt-get install -y trivy || wget -q https://github.com/aquasecurity/trivy/releases/download/v0.48.0/trivy_0.48.0_Linux-64bit.tar.gz && tar zxf trivy_0.48.0_Linux-64bit.tar.gz && sudo mv trivy /usr/local/bin/
 
-      - name: Install Gitleaks
+          # Gitleaks
+          wget -q https://github.com/gitleaks/gitleaks/releases/download/v8.18.0/gitleaks-linux-x64 -O /tmp/gitleaks
+          chmod +x /tmp/gitleaks
+          sudo mv /tmp/gitleaks /usr/local/bin/gitleaks
+
+      - name: Verify tools
         run: |
-          wget https://github.com/gitleaks/gitleaks/releases/download/v8.18.0/gitleaks-linux-x64
-          chmod +x gitleaks-linux-x64
-          sudo mv gitleaks-linux-x64 /usr/local/bin/gitleaks
+          echo "=== Tool versions ==="
+          semgrep --version || echo "⚠️  Semgrep not found"
+          trivy --version || echo "⚠️  Trivy not found"
+          gitleaks --version || echo "⚠️  Gitleaks not found"
 
       - name: Run security scan
         run: |
-          python main.py
-        continue-on-error: true
+          python main.py . 2>&1 || echo "Warning: Scan encountered issues but generating fallback report"
+        env:
+          PYTHONUNBUFFERED: 1
 
       - name: Upload reports
         uses: actions/upload-artifact@v3
