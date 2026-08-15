@@ -1,15 +1,36 @@
-# Sanal Ortam
+# Virtual Environment
 venv/
+env/
+.venv/
 
-# Çevre Değişkenleri (ŞİFRELER BURADA, ASLA YÜKLEME)
+# Environment Variables (SECRETS HERE - NEVER UPLOAD)
 .env
+.env.local
 
-# Python Cache dosyaları
+# Python Cache
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+.Python
 
-# Oluşturulan Raporlar ve Taramalar (Depoyu kirletmesin)
+# Generated Reports and Scans (Don't clutter repo)
 scans/
 reports/
+security_report_*.md
+findings_*.json
 *.xml
 *.pdf
+
+# Deprecated Code (v1 - archived for reference only)
+old_code/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
