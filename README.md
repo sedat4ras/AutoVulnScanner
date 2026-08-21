@@ -8,6 +8,7 @@
 [![Secrets](https://img.shields.io/badge/Secrets-Gitleaks-FF6B35?style=flat-square)](https://github.com/gitleaks/gitleaks)
 [![LLM](https://img.shields.io/badge/LLM-Ollama--Mistral-7C3AED?style=flat-square)](https://ollama.ai/)
 [![License](https://img.shields.io/badge/License-MIT-lightgrey?style=flat-square)]()
+[![CI](https://github.com/sedat4ras/ShieldScan/actions/workflows/ci.yml/badge.svg)](https://github.com/sedat4ras/ShieldScan/actions/workflows/ci.yml)
 
 ---
 
@@ -119,9 +120,27 @@ brew install gitleaks
 ### Option B: Docker
 
 ```bash
+# Build (one time, ~2 min first build)
 docker build -t shieldscan:latest .
-docker run --interactive shieldscan:latest /path/to/repo
+
+# Scan a repository — mount it read/write so reports can be written back
+docker run --rm \
+  --user "$(id -u):$(id -g)" \
+  -v "$(pwd)":/work \
+  shieldscan:latest /work
+
+# With Ollama on the host: add --network=host so the container
+# can reach http://localhost:11434
+docker run --rm --network=host \
+  --user "$(id -u):$(id -g)" \
+  -v "$(pwd)":/work \
+  shieldscan:latest /work
 ```
+
+The image runs as a non-root user (`shield`, UID 10001), so either pass
+`--user "$(id -u):$(id -g)"` (Docker) or `--userns=keep-id:uid=10001,gid=10001`
+(rootless Podman) so the container process can write reports back to the
+bind-mounted directory.
 
 ## Usage
 
@@ -208,23 +227,31 @@ python main.py
 
 ## Docker Deployment
 
-For production use with guaranteed tool availability, use Docker:
+For production use with guaranteed tool availability, use the shipped image.
+See [Installation → Option B](#option-b-docker) for the run commands.
 
-```bash
-docker build -t shieldscan:latest .
-docker run --interactive shieldscan:latest /path/to/repository
-```
+The Dockerfile is a 3-stage build (scanners / pydeps / runtime):
 
-**Dockerfile includes:**
-- Python 3.11
-- Semgrep (SAST)
-- Trivy (SCA)
-- Gitleaks (Secrets)
-- All dependencies pre-installed
+- **Base:** `python:3.11.16-slim-trixie`, non-root user `shield` (UID 10001)
+- **Pinned:** Semgrep 1.174.0, Trivy 0.74.0, Gitleaks 8.30.1
+- **Runtime footprint:** ~770 MB, only `git` + `ca-certificates` on top of the Python slim
+- **No apt repos** for third-party tools — release tarballs pulled directly from GitHub, so upstream apt-key / signed-by churn cannot break the build
 
-## CI/CD Integration (Future)
+The design and trade-offs are written up in
+[docs/writeup-dockerfile-and-ci.md](docs/writeup-dockerfile-and-ci.md).
 
-GitHub Actions CI/CD pipeline is planned for **Faz 1-2** when proper containerization is in place. The current focus is on local scanning capability and production-grade Dockerfile.
+## CI/CD Integration
+
+Every push and pull request against `main` runs the GitHub Actions workflow at
+[.github/workflows/ci.yml](.github/workflows/ci.yml):
+
+| Job | What it does |
+|-----|--------------|
+| `Lint Dockerfile` | Hadolint against the Dockerfile |
+| `Build image`    | `docker/build-push-action@v6` with the GHA layer cache, exports the built image as a job artifact |
+| `Smoke test`     | Loads the artifact, verifies Semgrep / Trivy / Gitleaks are on `PATH` inside the container, runs an end-to-end scan against a fixture, asserts both reports are produced |
+
+Typical run time: **~3 minutes** end-to-end from a cold cache.
 
 ## Technical Details
 
