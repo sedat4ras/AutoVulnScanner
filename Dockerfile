@@ -1,38 +1,63 @@
-FROM python:3.11-slim
+# syntax=docker/dockerfile:1.7
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    git \
-    curl \
-    wget \
-    && rm -rf /var/lib/apt/lists/*
+# ---------- Stage 1: fetch third-party scanner binaries ----------
+FROM debian:trixie-slim AS scanners
 
-# Install Semgrep
-RUN python -m pip install --no-cache-dir semgrep
+ARG TRIVY_VERSION=0.74.0
+ARG GITLEAKS_VERSION=8.30.1
 
-# Install Trivy
-RUN wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | apt-key add - && \
-    echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | tee -a /etc/apt/sources.list.d/trivy.list && \
-    apt-get update && apt-get install -y trivy && \
-    rm -rf /var/lib/apt/lists/*
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends ca-certificates curl \
+ && rm -rf /var/lib/apt/lists/*
 
-# Install Gitleaks
-RUN wget -O /tmp/gitleaks https://github.com/gitleaks/gitleaks/releases/download/v8.18.0/gitleaks-linux-x64 && \
-    chmod +x /tmp/gitleaks && \
-    mv /tmp/gitleaks /usr/local/bin/gitleaks
+RUN curl -fsSL -o /tmp/trivy.tgz \
+      "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz" \
+ && tar -xzf /tmp/trivy.tgz -C /usr/local/bin trivy \
+ && chmod +x /usr/local/bin/trivy \
+ && /usr/local/bin/trivy --version
 
-# Setup working directory
+RUN curl -fsSL -o /tmp/gitleaks.tgz \
+      "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" \
+ && tar -xzf /tmp/gitleaks.tgz -C /usr/local/bin gitleaks \
+ && chmod +x /usr/local/bin/gitleaks \
+ && /usr/local/bin/gitleaks version
+
+
+# ---------- Stage 2: install python deps into a portable prefix ----------
+FROM python:3.11.16-slim-trixie AS pydeps
+
+ARG SEMGREP_VERSION=1.174.0
+
+COPY requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir --prefix=/install \
+      -r /tmp/requirements.txt \
+      "semgrep==${SEMGREP_VERSION}"
+
+
+# ---------- Stage 3: runtime ----------
+FROM python:3.11.16-slim-trixie
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends git ca-certificates \
+ && rm -rf /var/lib/apt/lists/* \
+ && groupadd --gid 10001 shield \
+ && useradd  --uid 10001 --gid shield \
+              --home-dir /home/shield --create-home --shell /usr/sbin/nologin shield
+
+COPY --from=scanners /usr/local/bin/trivy    /usr/local/bin/trivy
+COPY --from=scanners /usr/local/bin/gitleaks /usr/local/bin/gitleaks
+COPY --from=pydeps   /install                /usr/local
+
 WORKDIR /app
+COPY --chown=shield:shield main.py ./
+COPY --chown=shield:shield src/    ./src/
 
-# Copy requirements and install Python dependencies
-COPY requirements.txt .
-RUN python -m pip install --no-cache-dir -r requirements.txt
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app
 
-# Copy application code
-COPY . .
+USER shield
+WORKDIR /work
 
-# Make sure src is importable
-ENV PYTHONPATH=/app:$PYTHONPATH
-
-# Default command
-ENTRYPOINT ["python", "main.py"]
+ENTRYPOINT ["python", "/app/main.py"]
+CMD ["/work"]
