@@ -79,18 +79,56 @@ jobs:
             gitleaks version
           '
 
-      - name: Prepare scan fixture
+      - name: Prepare vulnerable fixture
         run: |
           mkdir -p /tmp/scan
-          cp -r src main.py requirements.txt /tmp/scan/
+          # Token values are generated at runtime so no literal credential
+          # pattern is ever stored in this repository.
+          {
+            printf 'AWS_ACCESS_KEY_ID = "AKIA%s"\n' "$(tr -dc 'A-Z0-9' </dev/urandom | head -c 16)"
+            printf 'GITHUB_TOKEN = "ghp_%s"\n' "$(tr -dc 'A-Za-z0-9' </dev/urandom | head -c 36)"
+          } > /tmp/scan/config.py
+          cat > /tmp/scan/app.py <<'PY'
+          import os
+          import sqlite3
+
+          from flask import Flask, request
+
+          app = Flask(__name__)
+
+
+          @app.route("/user")
+          def get_user():
+              name = request.args.get("name")
+              cursor = sqlite3.connect("app.db").cursor()
+              cursor.execute("SELECT * FROM users WHERE name = '%s'" % name)
+              return str(cursor.fetchall())
+
+
+          @app.route("/ping")
+          def ping():
+              os.system("ping -c 1 " + request.args.get("host"))
+              return "ok"
+          PY
+          printf 'Django==2.2.0\nFlask==0.12.2\nPyYAML==5.1\n' > /tmp/scan/requirements.txt
           sudo chown -R 10001:10001 /tmp/scan
 
       - name: Run end-to-end scan
         run: |
           docker run --rm -v /tmp/scan:/work shieldscan:ci /work
 
-      - name: Verify reports were written
+      - name: Verify every scanner produced findings
         run: |
           test -f /tmp/scan/security_report_*.md
-          test -f /tmp/scan/findings_*.json
-          echo "OK: reports produced"
+          python - "$(ls /tmp/scan/findings_*.json)" <<'PY'
+          import json
+          import sys
+
+          findings = json.load(open(sys.argv[1]))
+          for leg in ("sast", "sca", "secrets"):
+              count = len(findings.get(leg, []))
+              print(f"{leg}: {count} findings")
+              if count == 0:
+                  sys.exit(f"FAIL: {leg} scanner reported nothing on a deliberately vulnerable fixture")
+          print("OK: all three scanners produced findings")
+          PY

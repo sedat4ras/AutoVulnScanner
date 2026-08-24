@@ -1,7 +1,8 @@
 """Secrets Scanner - Gitleaks integration for API keys/tokens/credentials detection"""
 
-import subprocess
 import json
+import subprocess
+import tempfile
 from pathlib import Path
 
 
@@ -22,32 +23,42 @@ def run_gitleaks(target_path: str) -> dict:
         return {}
 
     try:
-        cmd = [
-            "gitleaks",
-            "detect",
-            f"--source={target_path}",
-            "--report-format=json",
-            "--verbose"
-        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            report_path = Path(tmp) / "gitleaks.json"
 
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+            # `dir` scans the working tree; the removed `detect` subcommand only
+            # ever read git history. Gitleaks writes JSON to --report-path, not
+            # to stdout, so the report is read back from disk.
+            cmd = [
+                "gitleaks",
+                "dir",
+                f"--report-path={report_path}",
+                "--report-format=json",
+                "--no-banner",
+                target_path,
+            ]
 
-        # Gitleaks exits with 1 if secrets found, 0 if clean
-        if result.stdout:
-            findings = json.loads(result.stdout)
-        else:
-            findings = []
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
 
-        secret_count = len(findings) if isinstance(findings, list) else 0
-        print(f"  ✅ Found {secret_count} potential secrets")
+            # 0 = clean, 1 = leaks found; anything else is a real failure.
+            if result.returncode not in (0, 1):
+                print(f"  ⚠️  Gitleaks failed: {result.stderr.strip()}")
+                return {}
 
-        return {"secrets": findings} if isinstance(findings, list) else {}
+            findings = json.loads(report_path.read_text()) if report_path.exists() else []
+
+        if not isinstance(findings, list):
+            print("  ❌ Unexpected Gitleaks report shape")
+            return {}
+
+        print(f"  ✅ Found {len(findings)} potential secrets")
+        return {"secrets": findings}
 
     except subprocess.TimeoutExpired:
         print("  ❌ Gitleaks scan timed out")
         return {}
     except json.JSONDecodeError:
-        print("  ❌ Failed to parse Gitleaks output")
+        print("  ❌ Failed to parse Gitleaks report")
         return {}
     except FileNotFoundError:
         print("  ⚠️  Gitleaks not installed. Download from: https://github.com/gitleaks/gitleaks")

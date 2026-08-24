@@ -72,6 +72,14 @@ def build_triage_prompt(findings: Dict) -> str:
 
     prompt = f"""You are a professional cybersecurity analyst. Analyze these security scan findings and create a prioritized report.
 
+Authoritative totals (use these exact numbers, never recount from the samples):
+- SAST: {len(sast_items)}
+- SCA: {len(sca_items)}
+- Secrets: {len(secrets)}
+- TOTAL: {len(sast_items) + len(sca_items) + len(secrets)}
+
+Below each heading is a sample of up to 5 findings per category, not the full list.
+
 **STATIC ANALYSIS (SAST)** - Code vulnerabilities:
 {json.dumps(sast_items[:5], indent=2) if sast_items else "None found"}
 
@@ -89,7 +97,13 @@ Create a professional security report with:
 5. Remediation Actions (specific steps)
 
 Be concise, technical, and actionable. Use markdown formatting.
-Focus on real risk, not noise. Omit false positives."""
+Focus on real risk, not noise. Omit false positives.
+
+Rules:
+- Report only on the findings given above. Never invent a vulnerability, CVE, file or line number.
+- Any count you state must come from the authoritative totals block. Never derive counts from the samples.
+- Never claim a category is clean unless its section above says "None found".
+- End after the remediation section. No sign-offs, closing remarks, promotions, or links to repositories."""
 
     return prompt
 

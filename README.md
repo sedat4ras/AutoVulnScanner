@@ -22,6 +22,8 @@ ShieldScan is a production-grade DevSecOps pipeline that scans source code repos
 
 All findings are automatically categorized and prioritized using a **local Ollama Mistral LLM** (no API costs, fully offline).
 
+![ShieldScan scanning a deliberately vulnerable demo app](assets/terminal.png)
+
 ## Architecture
 
 ```
